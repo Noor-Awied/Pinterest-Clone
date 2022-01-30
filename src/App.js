@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -16,6 +16,45 @@ function App() {
     imgObject.description = "This is description for image " + x;
     Posts.push(imgObject);
   }
+
+  useEffect(() => {
+    const resizeGridItem = (item) => {
+      const myGrid = document.querySelector(".maisonary");
+      let rowHeight = parseInt(
+        window.getComputedStyle(myGrid).getPropertyValue("grid-auto-rows")
+      );
+
+      let rowGap = parseInt(
+        window.getComputedStyle(myGrid).getPropertyValue("grid-row-gap")
+      );
+      let contentHeight = item.querySelector(".content").clientHeight;
+      let newSpan = Math.ceil(contentHeight / (rowHeight + rowGap));
+      item.style.gridRowEnd = "span " + newSpan;
+    };
+
+    const resizeAllGridItems = () => {
+      let allItems = document.querySelectorAll(".item");
+      var allItemsArr = Array.from(allItems);
+      for (let x = 0; x < allItemsArr.length; x++) {
+        console.log(allItemsArr[x]);
+        resizeGridItem(allItemsArr[x]);
+      }
+    };
+    Promise.all(
+      Array.from(document.images)
+        .filter((img) => !img.complete)
+        .map(
+          (img) =>
+            new Promise((resolve) => {
+              img.onload = img.onerror = resolve;
+            })
+        )
+    ).then(() => {
+      console.log("all images loaded");
+      resizeAllGridItems();
+    });
+    window.addEventListener("resize", resizeAllGridItems());
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
